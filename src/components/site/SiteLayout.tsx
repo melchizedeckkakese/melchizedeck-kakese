@@ -110,8 +110,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const { data: isAdmin } = useIsAdmin();
   useTypography();
   const { data: footer } = useSection<{ tagline?: string; copyright?: string } & Socials>("site", "footer");
-  const { data: bgSection } = useSection<{ imageUrl?: string }>("site", "background");
-  const bgImage = useVerifiedBackground(bgSection?.content?.imageUrl ?? "", bgPhoto.url);
+  const { data: bgSection } = useSection<Record<string, string | undefined>>("site", "background");
+  const pageKey = `bg_${pathname.split("/")[1]?.replace(/_$/, "") ?? ""}`;
+  const bgUrl = bgSection?.content?.[pageKey] || bgSection?.content?.imageUrl || "";
+  const bgImage = useVerifiedBackground(bgUrl, bgPhoto.url);
   const socials: Socials = { ...DEFAULT_SOCIALS, ...(footer?.content ?? {}) };
   const { data: projectItems } = useCollection("project");
   const navTree: NavNode[] = NAV.map((node) =>
