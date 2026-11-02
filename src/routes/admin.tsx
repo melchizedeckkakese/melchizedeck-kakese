@@ -98,6 +98,15 @@ const PAGES: { page: string; sections: { key: string; label: string; fields: Fie
   { page: "site", sections: [
     { key: "background", label: "Site background image", fields: [
       { name: "imageUrl", label: "Background photo (blurred behind all pages)", type: "image" },
+      { name: "bg_about", label: "About page background (optional — overrides the default)", type: "image" },
+      { name: "bg_projects", label: "Projects page background", type: "image" },
+      { name: "bg_books", label: "Books page background", type: "image" },
+      { name: "bg_scripts", label: "Scripts page background", type: "image" },
+      { name: "bg_blog", label: "Blog page background", type: "image" },
+      { name: "bg_advocacy", label: "Advocacy page background", type: "image" },
+      { name: "bg_events", label: "Events page background", type: "image" },
+      { name: "bg_speeches", label: "Speeches page background", type: "image" },
+      { name: "bg_contact", label: "Contact page background", type: "image" },
     ]},
     { key: "support", label: "Support My Vision (contributions)", fields: [
       { name: "eyebrow", label: "Eyebrow" },
