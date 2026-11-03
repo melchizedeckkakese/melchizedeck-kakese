@@ -91,12 +91,13 @@ const DEFAULT_SOCIALS = {
 type Socials = Partial<typeof DEFAULT_SOCIALS>;
 
 function useVerifiedBackground(url: string, fallback: string) {
-  const [src, setSrc] = useState(fallback);
+  const [src, setSrc] = useState(url || fallback);
   useEffect(() => {
     if (!url || url === fallback) { setSrc(fallback); return; }
+    setSrc(url);
     const img = new Image();
     let done = false;
-    img.onload = () => { if (!done) { done = true; setSrc(url); } };
+    img.onload = () => { done = true; };
     img.onerror = () => { if (!done) { done = true; setSrc(fallback); } };
     img.src = url;
     return () => { done = true; };
@@ -130,7 +131,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative isolate flex min-h-screen flex-col">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat"
