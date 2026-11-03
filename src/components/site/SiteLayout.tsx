@@ -130,7 +130,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative isolate flex min-h-screen flex-col">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-20 bg-cover bg-center bg-no-repeat"
