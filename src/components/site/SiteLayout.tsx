@@ -91,12 +91,13 @@ const DEFAULT_SOCIALS = {
 type Socials = Partial<typeof DEFAULT_SOCIALS>;
 
 function useVerifiedBackground(url: string, fallback: string) {
-  const [src, setSrc] = useState(fallback);
+  const [src, setSrc] = useState(url || fallback);
   useEffect(() => {
     if (!url || url === fallback) { setSrc(fallback); return; }
+    setSrc(url);
     const img = new Image();
     let done = false;
-    img.onload = () => { if (!done) { done = true; setSrc(url); } };
+    img.onload = () => { done = true; };
     img.onerror = () => { if (!done) { done = true; setSrc(fallback); } };
     img.src = url;
     return () => { done = true; };
