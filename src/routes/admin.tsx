@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Loader2, Trash2, Plus, Upload, LogOut, ImageIcon } from "lucide-react";
 import { BlocksEditor } from "@/components/admin/BlocksEditor";
 import { FONT_OPTIONS, FONT_GROUPS, findFont } from "@/lib/fonts";
+import { PaletteAssistant } from "@/components/admin/PaletteAssistant";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Website Admin | Melchizedeck Kakese" }, { name: "description", content: "Manage biography photos, writing and events on Melchizedeck Kakese’s website." }, { property: "og:title", content: "Website Admin | Melchizedeck Kakese" }, { property: "og:description", content: "Manage biography photos, writing and events on Melchizedeck Kakese’s website." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
@@ -346,6 +347,9 @@ function SectionEditor({ page, sectionKey, label, fields }: { page: string; sect
     <div className="rounded-xl border border-border/60 bg-card/40 p-6">
       <h3 className="font-serif text-xl text-cream">{label}</h3>
       <div className="mt-4 grid gap-4">
+        {page === "site" && sectionKey === "brand" && (
+          <PaletteAssistant onApply={(colors) => setForm((f) => ({ ...f, ...colors }))} />
+        )}
         {fields.map((f) => (
           <FieldInput key={f.name} field={f} value={form[f.name]} onChange={(v) => setForm({ ...form, [f.name]: v })} />
         ))}
