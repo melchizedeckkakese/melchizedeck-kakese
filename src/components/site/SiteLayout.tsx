@@ -110,6 +110,22 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   useTypography();
+  const { data: brand } = useSection<Record<string, string | undefined>>("site", "brand");
+  const b = brand?.content ?? {};
+  const logoFirst = b.logoFirst?.trim() || "M.";
+  const logoSecond = b.logoSecond?.trim() || "Kakese";
+  useEffect(() => {
+    const map: Record<string, string> = { gold: "--gold", cream: "--cream", background: "--background", foreground: "--foreground", card: "--card", muted: "--muted", mutedForeground: "--muted-foreground", primary: "--primary", primaryForeground: "--primary-foreground", border: "--border", destructive: "--destructive" };
+    const extra: Record<string, string[]> = { gold: ["--gold-soft", "--accent", "--ring"], card: ["--popover"], muted: ["--secondary", "--input"], foreground: ["--card-foreground", "--popover-foreground", "--secondary-foreground"], primaryForeground: ["--accent-foreground"] };
+    const css = Object.entries(map).flatMap(([k, v]) => {
+      const val = b[k]?.trim();
+      if (!val || !/^#[0-9a-f]{3,8}$|^(rgb|hsl|oklch)\(/i.test(val)) return [];
+      return [v, ...(extra[k] ?? [])].map((n) => `${n}:${val} !important;`);
+    }).join("");
+    let el = document.getElementById("brand-colors") as HTMLStyleElement | null;
+    if (!el) { el = document.createElement("style"); el.id = "brand-colors"; document.head.appendChild(el); }
+    el.textContent = css ? `:root,.dark,.light{${css}}` : "";
+  }, [JSON.stringify(b)]);
   const { data: footer } = useSection<{ tagline?: string; copyright?: string } & Socials>("site", "footer");
   const { data: bgSection } = useSection<Record<string, string | undefined>>("site", "background");
   const pageKey = `bg_${pathname.split("/")[1]?.replace(/_$/, "") ?? ""}`;
@@ -147,7 +163,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 <header className="sticky top-0 z-40 border-b border-border/40 bg-background/80 backdrop-blur-md">
   <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-5 md:flex md:justify-between">
     <Link to="/" className="min-w-0 shrink-0 truncate font-serif text-xl tracking-wide text-cream">
-      M.<span className="text-gold">Kakese</span>
+      {logoFirst}<span className="text-gold">{logoSecond}</span>
     </Link>
     <nav aria-label="Main navigation" className="hidden min-w-0 items-center gap-3 md:flex xl:gap-6">
       {navTree.map((item) =>
@@ -286,7 +302,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           />
           <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="font-serif text-lg text-cream">M.<span className="text-gold">Kakese</span></div>
+              <div className="font-serif text-lg text-cream">{logoFirst}<span className="text-gold">{logoSecond}</span></div>
               <p className="mt-1 max-w-md text-sm text-muted-foreground">{footer?.content?.tagline ?? "Words that move continents."}</p>
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
