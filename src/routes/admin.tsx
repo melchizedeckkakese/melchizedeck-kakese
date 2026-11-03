@@ -116,6 +116,21 @@ const PAGES: { page: string; sections: { key: string; label: string; fields: Fie
       { name: "buttonLabel", label: "Button label" },
       { name: "note", label: "Small note under the text", type: "textarea" },
     ]},
+    { key: "brand", label: "Logo text & colours", fields: [
+      { name: "logoFirst", label: "Logo first part (default: M.)" },
+      { name: "logoSecond", label: "Logo highlighted part (default: Kakese)" },
+      { name: "gold", label: "Gold accent — highlights, links, logo", type: "color" },
+      { name: "cream", label: "Headline text colour", type: "color" },
+      { name: "background", label: "Page background colour", type: "color" },
+      { name: "foreground", label: "Body text colour", type: "color" },
+      { name: "card", label: "Card / panel colour", type: "color" },
+      { name: "muted", label: "Soft panel colour", type: "color" },
+      { name: "mutedForeground", label: "Secondary text colour", type: "color" },
+      { name: "primary", label: "Button colour", type: "color" },
+      { name: "primaryForeground", label: "Button text colour", type: "color" },
+      { name: "border", label: "Border / divider colour", type: "color" },
+      { name: "destructive", label: "Warning / delete colour", type: "color" },
+    ]},
     { key: "typography", label: "Typography (fonts)", fields: [
       { name: "displayFont", label: "Display font — big page/hero titles", type: "font" },
       { name: "headingFont", label: "Heading font — section headings", type: "font" },
@@ -203,7 +218,7 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
 
 ];
 
-type FieldSpec = { name: string; label: string; type?: "text" | "textarea" | "image" | "json" | "video" | "blocks" | "gallery" | "font" | "pillars" };
+type FieldSpec = { name: string; label: string; type?: "text" | "textarea" | "image" | "json" | "video" | "blocks" | "gallery" | "font" | "pillars" | "color" };
 
 function Admin() {
   const nav = useNavigate();
@@ -369,6 +384,16 @@ function FieldInput({ field, value, onChange }: { field: FieldSpec; value: unkno
     return (
       <div>
         <BlocksEditor value={value} photosOnly={field.type === "gallery"} onChange={(v) => onChange(v)} />
+      </div>
+    );
+  }
+  if (field.type === "color") {
+    const v = String(value ?? "");
+    return (
+      <div className="flex items-center gap-3">
+        <input type="color" aria-label={field.label} value={/^#[0-9a-f]{6}$/i.test(v) ? v : "#000000"} onChange={(e) => onChange(e.target.value)} className="h-10 w-14 cursor-pointer rounded border border-border bg-background" />
+        <Input value={v} placeholder="Default (leave empty)" onChange={(e) => onChange(e.target.value)} className="max-w-[12rem]" />
+        {v && <Button type="button" variant="outline" size="sm" onClick={() => onChange("")}>Reset</Button>}
       </div>
     );
   }
