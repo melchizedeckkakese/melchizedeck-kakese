@@ -76,7 +76,7 @@ function Blog() {
           {filtered?.map((post) => {
             const m = (post.meta ?? {}) as {
               category?: string;
-              read_time?: string;
+              read_time?: string; audio_url?: string;
             };
 
             const dateStr = new Date(
@@ -124,6 +124,13 @@ function Blog() {
                     preserveLineBreaks={/poem|poetry/i.test(m.category ?? "")}
                     className="mt-6 text-muted-foreground"
                   />
+                )}
+
+                {m.audio_url && (
+                  <div className="mt-6 rounded-lg border border-border/60 bg-card/60 p-4">
+                    <p className="text-xs uppercase tracking-widest text-gold">Listen to this piece</p>
+                    <audio src={m.audio_url} controls preload="none" className="mt-2 w-full" />
+                  </div>
                 )}
 
                 {/* Engagement */}

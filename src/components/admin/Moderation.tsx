@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ type Row = {
   body: string | null;
   rating?: number;
   created_at: string;
+  admin_reply?: string | null;
 };
 
 function useModerationFeed() {
@@ -127,6 +129,7 @@ export function Moderation() {
                   {c.body}
                 </p>
               )}
+              <ReplyBox id={c.id} initial={c.admin_reply ?? ""} onSaved={refetch} />
             </div>
           ))}
 
@@ -183,6 +186,41 @@ export function Moderation() {
             <p className="text-sm text-muted-foreground">No reviews yet.</p>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ReplyBox({ id, initial, onSaved }: { id: string; initial: string; onSaved: () => void }) {
+  const [text, setText] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const qc = useQueryClient();
+  const save = async (value: string) => {
+    setSaving(true);
+    const { error } = await supabase
+      .from("content_comments")
+      .update({ admin_reply: value.trim() || null, replied_at: value.trim() ? new Date().toISOString() : null })
+      .eq("id", id);
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success(value.trim() ? "Reply posted." : "Reply removed.");
+    qc.invalidateQueries({ queryKey: ["comments"] });
+    onSaved();
+  };
+  return (
+    <div className="mt-3 space-y-2">
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={2}
+        placeholder="Write a public reply…"
+        className="w-full rounded-md border border-border bg-background/60 p-2 text-sm text-foreground"
+      />
+      <div className="flex gap-2">
+        <button disabled={saving} onClick={() => save(text)} className="rounded-md bg-primary px-3 py-1 text-xs text-primary-foreground disabled:opacity-50">
+          {saving ? "Saving…" : initial ? "Update reply" : "Reply"}
+        </button>
+        {initial && <button disabled={saving} onClick={() => { setText(""); save(""); }} className="text-xs text-muted-foreground hover:text-destructive">Remove reply</button>}
       </div>
     </div>
   );

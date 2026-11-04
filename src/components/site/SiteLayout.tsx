@@ -1,3 +1,4 @@
+import { useTrackVisit } from "@/lib/visits";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Menu, X, ShieldCheck, ChevronDown, Instagram, Facebook, Linkedin, Mail, MessageCircle, ShoppingBag, AtSign, Link2 } from "lucide-react";
@@ -107,6 +108,7 @@ function useVerifiedBackground(url: string, fallback: string) {
 
 export function SiteLayout({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useTrackVisit(pathname);
   const [open, setOpen] = useState(false);
   const { data: isAdmin } = useIsAdmin();
   useTypography();

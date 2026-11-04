@@ -1,3 +1,4 @@
+import { ShareButtons } from "@/components/site/ShareButtons";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { pageHead, PERSON_LD, WEBSITE_LD, SITE_URL } from "@/lib/seo";
 import { SiteLayout } from "@/components/site/SiteLayout";
@@ -300,6 +301,10 @@ function Index() {
               {f.body && (
                 <ExpandableText key={latestEvent?.id ?? f.body} text={f.body} threshold={240} moreHref={latestEvent ? "/events" : undefined} className="mt-4 text-muted-foreground" />
               )}
+
+              <div className="mt-4">
+                <ShareButtons title={f.title || "Point of Focus"} path="/events" text={(f.body || "").slice(0, 140)} />
+              </div>
 
               {(f.primaryLabel || f.secondaryLabel) && (
                 <div className="mt-8 flex flex-wrap gap-3">

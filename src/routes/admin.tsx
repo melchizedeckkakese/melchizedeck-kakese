@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Moderation } from "@/components/admin/Moderation";
+import { VisitorTracker } from "@/components/admin/VisitorTracker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, Trash2, Plus, Upload, LogOut, ImageIcon } from "lucide-react";
@@ -167,7 +168,7 @@ const PAGES: { page: string; sections: { key: string; label: string; fields: Fie
   ]},
 ];
 
-type MetaField = { name: string; label: string; type?: "text" | "bool" | "video" | "textarea" | "gallery" };
+type MetaField = { name: string; label: string; type?: "text" | "bool" | "video" | "textarea" | "gallery" | "audio" };
 const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockable?: boolean }[] = [
   { key: "book", label: "Books", lockable: true, extraMeta: [
     { name: "genre", label: "Genre" },
@@ -184,6 +185,7 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
   { key: "blog", label: "Blog posts", extraMeta: [
     { name: "category", label: "Category" },
     { name: "read_time", label: "Read time (e.g. 5 min)" },
+    { name: "audio_url", label: "Audio version (recitation)", type: "audio" },
   ]},
   { key: "script", label: "Scripts", lockable: true, extraMeta: [
     { name: "synopsis", label: "Synopsis (shown on its own page — Body above is the logline)", type: "textarea" },
@@ -219,7 +221,7 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
 
 ];
 
-type FieldSpec = { name: string; label: string; type?: "text" | "textarea" | "image" | "json" | "video" | "blocks" | "gallery" | "font" | "pillars" | "color" };
+type FieldSpec = { name: string; label: string; type?: "text" | "textarea" | "image" | "json" | "video" | "blocks" | "gallery" | "font" | "pillars" | "color" | "audio" };
 
 function Admin() {
   const nav = useNavigate();
@@ -272,6 +274,7 @@ function Admin() {
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="inbox">Inbox</TabsTrigger>
             <TabsTrigger value="moderation">Moderation</TabsTrigger>
+            <TabsTrigger value="visitors">Visitors</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pages" className="mt-6">
@@ -305,6 +308,7 @@ function Admin() {
           <TabsContent value="payments" className="mt-6"><PaymentsSettings /></TabsContent>
           <TabsContent value="inbox" className="mt-6"><Inbox /></TabsContent>
           <TabsContent value="moderation" className="mt-6"><Moderation /></TabsContent>
+          <TabsContent value="visitors" className="mt-6"><VisitorTracker /></TabsContent>
         </Tabs>
       </section>
     </SiteLayout>
@@ -411,6 +415,39 @@ function FieldInput({ field, value, onChange }: { field: FieldSpec; value: unkno
         <span className="text-xs uppercase tracking-widest text-muted-foreground">{field.label}</span>
         <Textarea rows={4} value={String(value ?? "")} onChange={(e) => onChange(e.target.value)} className="mt-1.5" />
       </label>
+    );
+  }
+  if (field.type === "audio") {
+    const url = String(value ?? "");
+    return (
+      <div className="rounded-lg border border-border/60 p-3">
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">{field.label}</span>
+        <div className="mt-2 flex flex-col gap-2">
+          {url && <audio src={url} controls preload="metadata" className="w-full max-w-md" />}
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent/10">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? `Uploading… ${progress}%` : "Upload audio"}
+              <input type="file" accept="audio/*" className="hidden" onChange={async (e) => {
+                const file = e.target.files?.[0]; if (!file) return;
+                setUploading(true); setProgress(0);
+                const t = toast.loading("Uploading audio…");
+                try {
+                  const u = await uploadMedia(file, { onProgress: (p) => setProgress(p), allowedTypes: [file.type || "audio/mpeg"], maxBytes: MAX_VIDEO_BYTES });
+                  onChange(u);
+                  toast.success("Audio uploaded", { id: t });
+                } catch (err) {
+                  toast.error((err as Error).message, { id: t });
+                } finally {
+                  setUploading(false); setProgress(0); e.target.value = "";
+                }
+              }} />
+            </label>
+            {url && <Button size="sm" variant="ghost" onClick={() => onChange("")}>Remove audio</Button>}
+          </div>
+          <p className="text-xs text-muted-foreground">MP3, M4A, WAV or OGG — up to 50MB.</p>
+        </div>
+      </div>
     );
   }
   if (field.type === "video") {
@@ -628,9 +665,9 @@ function ItemEditor({ item, extraMeta, lockable, onChange }: { item: Item; extra
                 </div>
               );
             }
-            if (m.type === "video") {
+            if (m.type === "video" || m.type === "audio") {
               return (
-                <FieldInput key={m.name} field={{ name: m.name, label: m.label, type: "video" }} value={cur}
+                <FieldInput key={m.name} field={{ name: m.name, label: m.label, type: m.type }} value={cur}
                   onChange={(v) => setForm({ ...form, meta: { ...(form.meta as Record<string, unknown>), [m.name]: v } })} />
               );
             }
