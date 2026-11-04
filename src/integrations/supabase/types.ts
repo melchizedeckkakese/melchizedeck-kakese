@@ -16,27 +16,33 @@ export type Database = {
     Tables: {
       content_comments: {
         Row: {
+          admin_reply: string | null
           body: string
           created_at: string
           id: string
           item_id: string
           name: string
+          replied_at: string | null
           updated_at: string
         }
         Insert: {
+          admin_reply?: string | null
           body: string
           created_at?: string
           id?: string
           item_id: string
           name: string
+          replied_at?: string | null
           updated_at?: string
         }
         Update: {
+          admin_reply?: string | null
           body?: string
           created_at?: string
           id?: string
           item_id?: string
           name?: string
+          replied_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -343,6 +349,39 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      site_visits: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          path: string
+          referrer: string | null
+          user_agent: string | null
+          visitor_key: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          path: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_key: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          path?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_key?: string
         }
         Relationships: []
       }
