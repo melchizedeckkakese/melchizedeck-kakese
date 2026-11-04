@@ -76,7 +76,7 @@ function Blog() {
           {filtered?.map((post) => {
             const m = (post.meta ?? {}) as {
               category?: string;
-              read_time?: string;
+              read_time?: string; audio_url?: string;
             };
 
             const dateStr = new Date(
