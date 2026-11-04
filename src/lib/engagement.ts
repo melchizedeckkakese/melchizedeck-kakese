@@ -24,6 +24,8 @@ export type Comment = {
   name: string;
   body: string;
   created_at: string;
+  admin_reply?: string | null;
+  replied_at?: string | null;
 };
 
 export type Review = {

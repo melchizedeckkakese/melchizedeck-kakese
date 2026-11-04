@@ -126,6 +126,13 @@ function Blog() {
                   />
                 )}
 
+                {m.audio_url && (
+                  <div className="mt-6 rounded-lg border border-border/60 bg-card/60 p-4">
+                    <p className="text-xs uppercase tracking-widest text-gold">Listen to this piece</p>
+                    <audio src={m.audio_url} controls preload="none" className="mt-2 w-full" />
+                  </div>
+                )}
+
                 {/* Engagement */}
                 <div className="mt-6 flex flex-wrap items-center gap-2">
                   <LikeButton itemId={post.id} />

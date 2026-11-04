@@ -80,6 +80,12 @@ export function CommentsSection({ itemId }: { itemId: string }) {
                   </div>
                 </div>
                 <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{c.body}</p>
+                {c.admin_reply && (
+                  <div className="ml-4 mt-3 border-l-2 border-gold/60 pl-3">
+                    <p className="text-xs font-medium uppercase tracking-widest text-gold">Melchizedeck replied</p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{c.admin_reply}</p>
+                  </div>
+                )}
               </div>
             ))}
             {comments?.length === 0 && <p className="text-sm text-muted-foreground">Be the first to comment.</p>}
