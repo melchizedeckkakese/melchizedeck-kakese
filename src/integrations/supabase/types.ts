@@ -334,6 +334,29 @@ export type Database = {
           },
         ]
       }
+      script_synopses: {
+        Row: {
+          item_id: string
+          synopsis: string
+        }
+        Insert: {
+          item_id: string
+          synopsis?: string
+        }
+        Update: {
+          item_id?: string
+          synopsis?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "script_synopses_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: true
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           key: string
@@ -472,6 +495,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      read_script_synopsis: {
+        Args: { payment_reference?: string; script_id: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin"
