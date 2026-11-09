@@ -17,3 +17,4 @@
 - Store About gallery and paragraph photos in the existing About section; reuse the block photo editor to keep admin uploads authoritative.
 - Store each project's catalogue in that content item's metadata and reuse the block photo editor and gallery viewer; existing admin permissions and collection invalidation remain authoritative.
 - Reflow prose through shared reading styles and ExpandableText; preserve verse line breaks explicitly based on the content's poetry genre/category.
+- Keep screenplay synopses in the admin-only script_synopses table and read them through read_script_synopsis with a confirmed purchase reference; public CMS metadata must not leak paid text.

@@ -9,3 +9,5 @@
 - [x] Add independent project photo catalogues with admin uploads, captions, ordering and removal.
 - [x] Verify saved catalogues on the Projects page and photo viewer.
 - [x] Correct homepage work areas and verify Admin saves through to the homepage.
+- [x] Connect screenplay treatment information requests and verify saved requests in the admin inbox.
+- [x] Gate screenplay synopses behind confirmed payment and verify direct links, pending/confirmed access, and the admin editor.

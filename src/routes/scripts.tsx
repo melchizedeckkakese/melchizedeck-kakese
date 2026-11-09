@@ -7,10 +7,11 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { useSection, useCollection, type ContentItem } from "@/lib/cms";
 import { SmartImage } from "@/components/site/SmartImage";
 import { useUnlockEmail, useUnlocks, isItemLocked } from "@/lib/locks";
+import { TreatmentRequestDialog } from "@/components/site/TreatmentRequestDialog";
 import { UnlockDialog } from "@/components/site/UnlockDialog";
 import { ExpandableText } from "@/components/site/ExpandableText";
 import { PriceTag } from "@/components/site/PriceTag";
-import { BookOpen, Lock, Unlock, Gift, Loader2, X, FileText } from "lucide-react";
+import { BookOpen, Lock, Gift, Loader2, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
@@ -22,27 +23,9 @@ import { supabase } from "@/integrations/supabase/client";
 type Header = { title: string; body: string };
 
 export const Route = createFileRoute("/scripts")({
-  head: () => pageHead({ path: "/scripts", title: "Screenplays & Scripts | Melchizedeck Kakese", description: "Screenplays and teleplays by screenwriter Melchizedeck Kakese. Read loglines and synopses for free and request full screenplay treatments.", type: "website" }),
+  head: () => pageHead({ path: "/scripts", title: "Screenplays & Scripts | Melchizedeck Kakese", description: "Screenplays and teleplays by screenwriter Melchizedeck Kakese. Explore public loglines, unlock paid synopses, and request screenplay treatments with your contact and professional details.", type: "website" }),
   component: Scripts,
 });
-
-function SynopsisDialog({ item, onClose }: { item: ContentItem; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-lg rounded-xl border border-border/60 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 text-gold"><BookOpen className="h-5 w-5" /><span className="text-xs uppercase tracking-widest">Synopsis</span></div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
-        </div>
-        <h3 className="mt-3 font-serif text-2xl text-cream">{item.title}</h3>
-        {item.subtitle && <p className="mt-1 text-sm text-gold/80">{item.subtitle}</p>}
-        <div className="mt-4 max-h-[60vh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-          {item.body || "No synopsis available yet."}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Scripts() {
   const { data: header } = useSection<Header>("scripts", "header");
@@ -56,7 +39,7 @@ function Scripts() {
       return (data?.value ?? {}) as { standard_price?: number; currency?: string };
     },
   });
-  const [synopsisItem, setSynopsisItem] = useState<ContentItem | null>(null);
+  const [treatmentItem, setTreatmentItem] = useState<ContentItem | null>(null);
   const [unlockItem, setUnlockItem] = useState<ContentItem | null>(null);
   const qc = useQueryClient();
   const claim = useServerFn(claimBundlePick);
@@ -80,11 +63,10 @@ const { data: reviewSummaries } = useReviewSummaries(itemIds);
         </div>
         <div className="mt-6 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {items?.map((it: ContentItem) => {
-            const treatmentLocked = isItemLocked(it.meta) && !unlockedIds.has(it.id);
+            const synopsisLocked = isItemLocked(it.meta) && !unlockedIds.has(it.id);
             const m = (it.meta ?? {}) as { genre?: string; status?: string; price?: number; currency?: string; request_url?: string; request_email?: string };
             const itemPrice = m.price != null ? Number(m.price) : (pricing?.standard_price ?? null);
             const itemCurrency = m.currency ?? pricing?.currency ?? "TZS";
-            const requestHref = m.request_url ?? (m.request_email ? `mailto:${m.request_email}?subject=${encodeURIComponent(`Screenplay treatment request: ${it.title}`)}` : "/contact");
             return (
               <article key={it.id} className="overflow-hidden rounded-xl border border-border/60 bg-card/60 backdrop-blur">
                 {it.image_url && (
@@ -107,7 +89,7 @@ const { data: reviewSummaries } = useReviewSummaries(itemIds);
                   </div>
                   <div className="mt-2 flex items-start justify-between gap-3">
                     <h2 className="font-serif text-xl text-cream">{it.title}</h2>
-                    {treatmentLocked && itemPrice != null && <PriceTag amount={itemPrice} currency={itemCurrency} className="shrink-0" />}
+                    {synopsisLocked && itemPrice != null && <PriceTag amount={itemPrice} currency={itemCurrency} className="shrink-0" />}
                   </div>
                   {it.subtitle && <p className="mt-1 text-sm text-gold/80">{it.subtitle}</p>}
                   {(() => {
@@ -141,29 +123,24 @@ const { data: reviewSummaries } = useReviewSummaries(itemIds);
                     </>
                   )}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <Link to="/scripts/$id" params={{ id: it.slug || it.id }}>
-                        <BookOpen className="mr-1 h-3.5 w-3.5" /> Read Synopsis
-                      </Link>
-                    </Button>
-                    {treatmentLocked ? (
-                      <>
-                        <Button size="sm" className="bg-gold text-primary-foreground hover:opacity-90" onClick={() => setUnlockItem(it)}>
-                          <Lock className="mr-1 h-3.5 w-3.5" /> Request Screenplay Treatment
-                        </Button>
-                        {bundleActive && email && (
-                          <Button size="sm" variant="outline" disabled={claimMut.isPending} onClick={() => claimMut.mutate(it.id)}>
-                            {claimMut.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Gift className="mr-1 h-3.5 w-3.5" />} Use free pick
-                          </Button>
-                        )}
-                      </>
+                    {synopsisLocked ? (
+                      <Button size="sm" variant="outline" onClick={() => setUnlockItem(it)}>
+                        <Lock className="mr-1 h-3.5 w-3.5" /> Read Synopsis
+                      </Button>
                     ) : (
-                      <>
-                        {isItemLocked(it.meta) && <span className="inline-flex items-center gap-1 text-xs text-gold"><Unlock className="h-3.5 w-3.5" /> Unlocked</span>}
-                        <a href={requestHref} className="inline-flex items-center rounded-md bg-gold px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">
-                          <FileText className="mr-1 h-3.5 w-3.5" /> Request Screenplay Treatment
-                        </a>
-                      </>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to="/scripts/$id" params={{ id: it.slug || it.id }}>
+                          <BookOpen className="mr-1 h-3.5 w-3.5" /> Read Synopsis
+                        </Link>
+                      </Button>
+                    )}
+                    <Button size="sm" className="bg-gold text-primary-foreground hover:opacity-90" onClick={() => setTreatmentItem(it)}>
+                      <FileText className="mr-1 h-3.5 w-3.5" /> Request Screenplay Treatment
+                    </Button>
+                    {synopsisLocked && bundleActive && email && (
+                      <Button size="sm" variant="outline" disabled={claimMut.isPending} onClick={() => claimMut.mutate(it.id)}>
+                        {claimMut.isPending ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Gift className="mr-1 h-3.5 w-3.5" />} Use free pick
+                      </Button>
                     )}
                   </div>
                   <ReviewsSection itemId={it.id} />
@@ -174,8 +151,8 @@ const { data: reviewSummaries } = useReviewSummaries(itemIds);
           {items?.length === 0 && <p className="text-muted-foreground">Nothing here yet — check back soon.</p>}
         </div>
       </section>
-      {synopsisItem && <SynopsisDialog item={synopsisItem} onClose={() => setSynopsisItem(null)} />}
-      {unlockItem && (() => { const om = (unlockItem.meta ?? {}) as { price?: number | string; currency?: string }; const ip = om.price != null && om.price !== "" ? Number(om.price) : null; return <UnlockDialog item={unlockItem} onClose={() => setUnlockItem(null)} price={pricing} itemPrice={ip} itemCurrency={om.currency ?? pricing?.currency} />; })()}
+      {treatmentItem && <TreatmentRequestDialog title={treatmentItem.title} onClose={() => setTreatmentItem(null)} />}
+      {unlockItem && (() => { const om = (unlockItem.meta ?? {}) as { price?: number | string; currency?: string }; const ip = om.price != null && om.price !== "" ? Number(om.price) : null; return <UnlockDialog synopsis item={unlockItem} onClose={() => setUnlockItem(null)} price={pricing} itemPrice={ip} itemCurrency={om.currency ?? pricing?.currency} />; })()}
     </SiteLayout>
   );
 }

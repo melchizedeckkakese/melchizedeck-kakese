@@ -188,7 +188,7 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
     { name: "audio_url", label: "Audio version (recitation)", type: "audio" },
   ]},
   { key: "script", label: "Scripts", lockable: true, extraMeta: [
-    { name: "synopsis", label: "Synopsis (shown on its own page — Body above is the logline)", type: "textarea" },
+    { name: "synopsis", label: "Synopsis (paid when locked — Body above is the public logline)", type: "textarea" },
     { name: "genre", label: "Genre" },
     { name: "status", label: "Status" },
     { name: "price", label: "Price (numeric — overrides standard price)" },
@@ -562,6 +562,11 @@ function CollectionEditor({ collection, label, extraMeta, lockable }: { collecti
     queryFn: async () => {
       const { data, error } = await supabase.from("content_items").select("*").eq("collection", collection).order("sort_order").order("created_at", { ascending: false });
       if (error) throw error;
+      if (collection === "script") {
+        const { data: synopses, error: synopsisError } = await supabase.from("script_synopses").select("item_id, synopsis");
+        if (synopsisError) throw synopsisError;
+        return data.map((item) => ({ ...item, meta: { ...(item.meta as Record<string, unknown>), synopsis: synopses?.find((s) => s.item_id === item.id)?.synopsis ?? "" } }));
+      }
       return data;
     },
   });
@@ -569,6 +574,10 @@ function CollectionEditor({ collection, label, extraMeta, lockable }: { collecti
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["admin-collection", collection] });
     qc.invalidateQueries({ queryKey: ["collection", collection] });
+    if (collection === "script") {
+      qc.invalidateQueries({ queryKey: ["script-item"] });
+      qc.invalidateQueries({ queryKey: ["script-synopsis"] });
+    }
   };
 
   const create = useMutation({
@@ -685,7 +694,7 @@ function ItemEditor({ item, extraMeta, lockable, onChange }: { item: Item; extra
               <label className="flex items-center gap-2 text-sm text-gold">
                 <input type="checkbox" checked={!!(form.meta as Record<string, unknown>)?.locked}
                   onChange={(e) => setForm({ ...form, meta: { ...(form.meta as Record<string, unknown>), locked: e.target.checked } })} />
-                🔒 Locked (paid unlock)
+                {item.collection === "script" ? "🔒 Paid synopsis" : "🔒 Locked (paid unlock)"}
               </label>
             )}
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
