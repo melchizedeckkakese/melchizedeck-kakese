@@ -152,7 +152,7 @@ const { data: reviewSummaries } = useReviewSummaries(itemIds);
         </div>
       </section>
       {treatmentItem && <TreatmentRequestDialog title={treatmentItem.title} onClose={() => setTreatmentItem(null)} />}
-      {unlockItem && (() => { const om = (unlockItem.meta ?? {}) as { price?: number | string; currency?: string }; const ip = om.price != null && om.price !== "" ? Number(om.price) : null; return <UnlockDialog item={unlockItem} onClose={() => setUnlockItem(null)} price={pricing} itemPrice={ip} itemCurrency={om.currency ?? pricing?.currency} />; })()}
+      {unlockItem && (() => { const om = (unlockItem.meta ?? {}) as { price?: number | string; currency?: string }; const ip = om.price != null && om.price !== "" ? Number(om.price) : null; return <UnlockDialog synopsis item={unlockItem} onClose={() => setUnlockItem(null)} price={pricing} itemPrice={ip} itemCurrency={om.currency ?? pricing?.currency} />; })()}
     </SiteLayout>
   );
 }

@@ -115,7 +115,7 @@ function SynopsisPage() {
           <div className="mt-8 space-y-4 text-base leading-relaxed text-muted-foreground">{synopsis?.split(/\n\s*\n/).map((paragraph, i) => <p key={i}>{paragraph}</p>)}</div>
         )}
       </article>
-      {paying && <UnlockDialog item={item} onClose={() => setPaying(false)} price={pricing} itemPrice={m.price != null && m.price !== "" ? Number(m.price) : null} itemCurrency={m.currency ?? pricing?.currency} />}
+      {paying && <UnlockDialog synopsis item={item} onClose={() => setPaying(false)} price={pricing} itemPrice={m.price != null && m.price !== "" ? Number(m.price) : null} itemCurrency={m.currency ?? pricing?.currency} />}
     </SiteLayout>
   );
 }

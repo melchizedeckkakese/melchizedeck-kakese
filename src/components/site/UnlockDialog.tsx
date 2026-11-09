@@ -16,9 +16,10 @@ type Props = {
   price?: { standard_price?: number; currency?: string };
   itemPrice?: number | null;
   itemCurrency?: string;
+  synopsis?: boolean;
 };
 
-export function UnlockDialog({ item, onClose, price, itemPrice, itemCurrency }: Props) {
+export function UnlockDialog({ item, onClose, price, itemPrice, itemCurrency, synopsis }: Props) {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [manual, setManual] = useState<PayInstructions | null>(null);
@@ -76,9 +77,9 @@ export function UnlockDialog({ item, onClose, price, itemPrice, itemCurrency }: 
         {manual ? (
           <div className="mt-5">
             <SelcomPayPanel info={manual} />
-            <Button asChild className="mt-4 w-full" variant="outline">
+            {synopsis && <Button asChild className="mt-4 w-full" variant="outline">
               <a href={`/scripts/${item.id}`}>Open synopsis after payment</a>
-            </Button>
+            </Button>}
             <Button variant="outline" className="mt-4 w-full" onClick={onClose}>Done</Button>
           </div>
         ) : (
