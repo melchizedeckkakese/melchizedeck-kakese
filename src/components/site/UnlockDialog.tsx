@@ -76,6 +76,9 @@ export function UnlockDialog({ item, onClose, price, itemPrice, itemCurrency }: 
         {manual ? (
           <div className="mt-5">
             <SelcomPayPanel info={manual} />
+            <Button asChild className="mt-4 w-full" variant="outline">
+              <a href={`/scripts/${item.id}`}>Open synopsis after payment</a>
+            </Button>
             <Button variant="outline" className="mt-4 w-full" onClick={onClose}>Done</Button>
           </div>
         ) : (
