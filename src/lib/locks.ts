@@ -4,6 +4,27 @@ import { useServerFn } from "@tanstack/react-start";
 import { listUnlocks } from "./payments.functions";
 
 const EMAIL_KEY = "mk_unlock_email";
+const PAYMENT_REF_KEY = "mk_payment_reference";
+
+export function storePaymentReference(reference: string) {
+  window.localStorage.setItem(PAYMENT_REF_KEY, reference);
+  window.dispatchEvent(new Event("mk-payment-reference"));
+}
+
+export function usePaymentReference() {
+  const [reference, setReference] = useState("");
+  useEffect(() => {
+    const update = () => setReference(window.localStorage.getItem(PAYMENT_REF_KEY) ?? "");
+    update();
+    window.addEventListener("mk-payment-reference", update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener("mk-payment-reference", update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
+  return reference;
+}
 
 export function getStoredEmail(): string {
   if (typeof window === "undefined") return "";

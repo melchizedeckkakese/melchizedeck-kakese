@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Lock, X, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { startCheckout } from "@/lib/payments.functions";
-import { setStoredEmail } from "@/lib/locks";
+import { setStoredEmail, storePaymentReference } from "@/lib/locks";
 import { useLocalPrice } from "@/lib/currency";
 import { SelcomPayPanel, type PayInstructions } from "@/components/site/SelcomPayPanel";
 
@@ -29,6 +29,7 @@ export function UnlockDialog({ item, onClose, price, itemPrice, itemCurrency }: 
     mutationFn: async () => start({ data: { email, phone, itemId: item.id } }),
     onSuccess: (r) => {
       setStoredEmail(email);
+      storePaymentReference(r.orderRef);
       qc.invalidateQueries({ queryKey: ["unlocks", email.trim().toLowerCase()] });
       if (r.manual && (r.manual.payLink || r.manual.qrPayload)) {
         setManual({
