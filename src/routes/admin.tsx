@@ -322,11 +322,6 @@ function SectionEditor({ page, sectionKey, label, fields }: { page: string; sect
     queryFn: async () => {
       const { data, error } = await supabase.from("page_sections").select("*").eq("page", page).eq("section_key", sectionKey).maybeSingle();
       if (error) throw error;
-      if (collection === "script") {
-        const { data: synopses, error: synopsisError } = await supabase.from("script_synopses").select("item_id, synopsis");
-        if (synopsisError) throw synopsisError;
-        return data.map((item) => ({ ...item, meta: { ...(item.meta as Record<string, unknown>), synopsis: synopses?.find((s) => s.item_id === item.id)?.synopsis ?? "" } }));
-      }
       return data;
     },
   });
@@ -567,6 +562,11 @@ function CollectionEditor({ collection, label, extraMeta, lockable }: { collecti
     queryFn: async () => {
       const { data, error } = await supabase.from("content_items").select("*").eq("collection", collection).order("sort_order").order("created_at", { ascending: false });
       if (error) throw error;
+      if (collection === "script") {
+        const { data: synopses, error: synopsisError } = await supabase.from("script_synopses").select("item_id, synopsis");
+        if (synopsisError) throw synopsisError;
+        return data.map((item) => ({ ...item, meta: { ...(item.meta as Record<string, unknown>), synopsis: synopses?.find((s) => s.item_id === item.id)?.synopsis ?? "" } }));
+      }
       return data;
     },
   });
