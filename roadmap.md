@@ -11,3 +11,5 @@
 - [x] Correct homepage work areas and verify Admin saves through to the homepage.
 - [x] Connect screenplay treatment information requests and verify saved requests in the admin inbox.
 - [x] Gate screenplay synopses behind confirmed payment and verify direct links, pending/confirmed access, and the admin editor.
+- [ ] Send contact, partnership, treatment and subscription notifications through Brevo while preserving saved submissions.
+- [ ] Verify form storage and actual Brevo delivery; document external hosting requirements.
