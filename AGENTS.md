@@ -19,3 +19,4 @@
 - Reflow prose through shared reading styles and ExpandableText; preserve verse line breaks explicitly based on the content's poetry genre/category.
 - Keep screenplay synopses in the admin-only script_synopses table and read them through read_script_synopsis with a confirmed purchase reference; public CMS metadata must not leak paid text.
 - Submit contact, treatment and subscription forms through a validated server function using anonymous insert permissions, then notify the fixed owner through a server-only Brevo helper; retain saved submissions when delivery fails to avoid lost enquiries.
+- Public form storage falls back to build-time public Cloud configuration; direct email delivery requires a separate explicit provider key, never a gateway-key fallback, so external hosts work without exposing or misrouting credentials.

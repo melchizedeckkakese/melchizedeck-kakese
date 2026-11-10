@@ -1,13 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { submissionSchema, submissionMessage } from "@/lib/form-submissions";
+import { formStorageConfig } from "@/lib/form-config";
 
 export const submitWebsiteForm = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => submissionSchema.parse(input))
   .handler(async ({ data }) => {
     const { createClient } = await import("@supabase/supabase-js");
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
-    if (!url || !key) throw new Error("Submission storage is not configured");
+    const { url, key } = formStorageConfig(process.env, {
+      VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+      VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    });
     // Anonymous insert-only permissions; never use admin access for public form writes.
     const client = createClient(url, key, { auth: { persistSession: false }, global: { fetch: (input, init) => {
       const headers = new Headers(init?.headers);
