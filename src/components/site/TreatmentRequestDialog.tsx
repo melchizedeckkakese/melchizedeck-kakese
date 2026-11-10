@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { submitWebsiteForm } from "@/lib/form-submissions.functions";
 import { treatmentRequestSchema as schema } from "@/lib/treatment-request";
 
 type Form = z.infer<typeof schema>;
@@ -23,6 +24,7 @@ export function TreatmentRequestDialog({ title, onClose }: { title: string; onCl
   const [form, setForm] = useState<Partial<Form>>({});
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const send = useServerFn(submitWebsiteForm);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,24 +37,9 @@ export function TreatmentRequestDialog({ title, onClose }: { title: string; onCl
     }
     setErrors({});
     setBusy(true);
-    const d = parsed.data;
-    const body = [
-      `Screenplay: ${title}`,
-      `Name: ${d.name}`,
-      `Email: ${d.email}`,
-      d.phone && `Phone: ${d.phone}`,
-      `Role: ${d.role}`,
-      `Company: ${d.company}`,
-      d.agency && `Agency: ${d.agency}`,
-      d.website && `Website: ${d.website}`,
-      d.message && `\nMessage:\n${d.message}`,
-    ].filter(Boolean).join("\n");
     try {
-      const { error } = await supabase.from("messages").insert({
-        name: d.name, email: d.email, subject: `Treatment request: ${title}`, body, kind: "treatment_request",
-      });
-      if (error) throw error;
-      toast.success("Request sent! You'll be contacted by email.");
+      const result = await send({ data: { type: "treatment", title, details: parsed.data } });
+      toast.success(result.emailSent ? "Request sent!" : "Request received. Email notification is delayed.");
       onClose();
     } catch {
       toast.error("Could not send your request. Please try again.");

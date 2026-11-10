@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { submitWebsiteForm } from "@/lib/form-submissions.functions";
+import { submissionSchema } from "@/lib/form-submissions";
 import { toast } from "sonner";
 import { Mail, MapPin } from "lucide-react";
 
@@ -20,14 +22,19 @@ function Contact() {
   const c = data?.content;
   const [form, setForm] = useState({ name: "", email: "", subject: "", body: "", kind: "contact" });
   const [loading, setLoading] = useState(false);
+  const send = useServerFn(submitWebsiteForm);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.from("messages").insert(form);
-    setLoading(false);
-    if (error) toast.error(error.message);
-    else { toast.success("Message sent."); setForm({ name: "", email: "", subject: "", body: "", kind: "contact" }); }
+    try {
+      const input = submissionSchema.parse({ type: "message", ...form });
+      const result = await send({ data: input });
+      if (result.emailSent) toast.success("Message sent.");
+      else toast.success("Message received. Email notification is delayed.");
+      setForm({ name: "", email: "", subject: "", body: "", kind: "contact" });
+    } catch { toast.error("Could not send your message. Check your details and try again."); }
+    finally { setLoading(false); }
   }
 
   return (
