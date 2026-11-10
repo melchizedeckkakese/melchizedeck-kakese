@@ -13,3 +13,5 @@
 - [x] Gate screenplay synopses behind confirmed payment and verify direct links, pending/confirmed access, and the admin editor.
 - [x] Send contact, partnership, treatment and subscription notifications through Brevo while preserving saved submissions.
 - [x] Verify contact form storage and Brevo delivered events; document external hosting requirements. Live deployment still requires publishing or external hosting secret configuration.
+- [ ] Add Vercel public-configuration fallbacks and explicit direct Brevo support without changing Lovable delivery.
+- [ ] Test form configuration and email routing; verify the contact submission flow.
