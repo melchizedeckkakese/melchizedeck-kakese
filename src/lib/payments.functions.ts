@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { formStorageConfig } from "@/lib/form-config";
 import type { Database } from "@/integrations/supabase/types";
 
 function makeFetch(key: string): typeof fetch {
@@ -14,8 +15,11 @@ function makeFetch(key: string): typeof fetch {
 }
 
 function serverClient() {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+  const { url, key } = formStorageConfig(process.env, {
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  });
   return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
     global: { fetch: makeFetch(key) },
@@ -55,23 +59,21 @@ export const startCheckout = createServerFn({ method: "POST" })
     const amount = Number(itemMeta.price ?? pay.standard_price ?? 10000);
     const currency = (itemMeta.currency ?? pay.currency ?? "TZS");
 
-    // Load admin client only after basic validation
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: purchase, error } = await supabaseAdmin
-      .from("purchases")
-      .insert({
-        email,
-        phone: data.phone ?? null,
-        item_id: item.id,
-        item_title: item.title,
-        amount,
-        currency,
-        provider: "selcom",
-        status: "pending",
-      })
-      .select("id, order_ref, amount, currency")
-      .single();
-    if (error) throw new Error(error.message);
+    // Anonymous insert-only (pending) so checkout works on any host, even without admin keys.
+    const purchase = { order_ref: crypto.randomUUID(), amount, currency };
+    const { error } = await supabase.from("purchases").insert({
+      id: crypto.randomUUID(),
+      order_ref: purchase.order_ref,
+      email,
+      phone: data.phone ?? null,
+      item_id: item.id,
+      item_title: item.title,
+      amount,
+      currency,
+      provider: "selcom",
+      status: "pending",
+    });
+    if (error) throw new Error("Could not start the payment. Please try again.");
 
     // Create a hosted Selcom checkout session and return the gateway URL the
     // buyer is redirected to. All Selcom logic lives in selcom.server.ts (server-only).

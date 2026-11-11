@@ -22,6 +22,13 @@
       "when": 1794417494491,
       "tag": "0002_lock_down_unlocks_and_likes",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794500000000,
+      "tag": "0003_anon_pending_donations",
+      "breakpoints": true
     }
   ]
 }
