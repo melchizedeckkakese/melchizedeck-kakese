@@ -45,17 +45,17 @@ export function useLikes(itemIds: string[]) {
     queryKey: ["likes", ids],
     enabled: ids.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("content_likes")
-        .select("item_id,visitor_key")
-        .in("item_id", ids);
-      if (error) throw error;
       const me = getVisitorKey();
+      const { data, error } = await supabase.rpc("get_like_stats", {
+        _item_ids: ids,
+        _visitor_key: me ?? "",
+      });
+      if (error) throw error;
       const counts: Record<string, number> = {};
       const mine = new Set<string>();
       (data ?? []).forEach((row) => {
-        counts[row.item_id] = (counts[row.item_id] ?? 0) + 1;
-        if (me && row.visitor_key === me) mine.add(row.item_id);
+        counts[row.item_id] = Number(row.like_count);
+        if (row.mine) mine.add(row.item_id);
       });
       return { counts, mine };
     },
@@ -69,11 +69,10 @@ export function useToggleLike() {
       const visitor_key = getVisitorKey();
       if (!visitor_key) throw new Error("Likes need browser storage enabled.");
       if (liked) {
-        const { error } = await supabase
-          .from("content_likes")
-          .delete()
-          .eq("item_id", itemId)
-          .eq("visitor_key", visitor_key);
+        const { error } = await supabase.rpc("unlike_item", {
+          _item_id: itemId,
+          _visitor_key: visitor_key,
+        });
         if (error) throw error;
       } else {
         const { error } = await supabase

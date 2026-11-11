@@ -139,7 +139,8 @@ export const listUnlocks = createServerFn({ method: "POST" })
     const email = normEmail(data.email);
     if (!email.includes("@")) return { itemIds: [] as string[], bundleExpiresAt: null as string | null };
     const supabase = serverClient();
-    const { data: rows } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
       .from("unlocks")
       .select("item_id, expires_at")
       .eq("email", email);
@@ -148,7 +149,7 @@ export const listUnlocks = createServerFn({ method: "POST" })
       .filter((r) => !r.expires_at || new Date(r.expires_at).getTime() > now)
       .map((r) => r.item_id);
 
-    const { data: bundle } = await supabase
+    const { data: bundle } = await supabaseAdmin
       .from("purchases")
       .select("bundle_expires_at")
       .eq("email", email)
@@ -163,10 +164,14 @@ export const listUnlocks = createServerFn({ method: "POST" })
 
 /** Public: within a bundle window, claim one extra free unlock. */
 export const claimBundlePick = createServerFn({ method: "POST" })
-  .inputValidator((d: { email: string; itemId: string }) => d)
+  .inputValidator((d: { email: string; itemId: string; paymentReference: string }) => d)
   .handler(async ({ data }) => {
     const email = normEmail(data.email);
+    const paymentReference = String(data.paymentReference ?? "").trim();
     if (!email.includes("@") || !data.itemId) throw new Error("Invalid request");
+    if (paymentReference.length < 8 || paymentReference.length > 100) {
+      throw new Error("Enter the order reference from your bundle payment");
+    }
 
     const supabase = serverClient();
     const { data: settings } = await supabase
@@ -177,19 +182,19 @@ export const claimBundlePick = createServerFn({ method: "POST" })
     const pay = (settings?.value ?? {}) as { bundle_free_picks?: number };
     const freePicks = Math.max(0, Number(pay.bundle_free_picks ?? 1));
 
-    const { data: bundle } = await supabase
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Caller must prove ownership of the paid bundle purchase via its order reference.
+    const { data: bundle } = await supabaseAdmin
       .from("purchases")
       .select("id, bundle_expires_at")
       .eq("email", email)
+      .eq("order_ref", paymentReference)
       .eq("status", "paid")
-      .order("bundle_expires_at", { ascending: false })
-      .limit(1)
       .maybeSingle();
     if (!bundle?.bundle_expires_at || new Date(bundle.bundle_expires_at).getTime() < Date.now()) {
       throw new Error("Your bundle window has ended");
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { count } = await supabaseAdmin
       .from("unlocks")
       .select("id", { count: "exact", head: true })

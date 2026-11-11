@@ -487,6 +487,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_like_stats: {
+        Args: { _item_ids: string[]; _visitor_key: string }
+        Returns: {
+          item_id: string
+          like_count: number
+          mine: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -498,6 +506,10 @@ export type Database = {
       read_script_synopsis: {
         Args: { payment_reference?: string; script_id: string }
         Returns: string
+      }
+      unlike_item: {
+        Args: { _item_id: string; _visitor_key: string }
+        Returns: undefined
       }
     }
     Enums: {

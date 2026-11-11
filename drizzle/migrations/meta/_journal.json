@@ -15,6 +15,13 @@
       "when": 1794209152826,
       "tag": "0001_protect_screenplay_synopses",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794417494491,
+      "tag": "0002_lock_down_unlocks_and_likes",
+      "breakpoints": true
     }
   ]
 }
