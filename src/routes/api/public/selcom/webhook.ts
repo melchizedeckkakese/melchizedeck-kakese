@@ -23,7 +23,11 @@ export const Route = createFileRoute("/api/public/selcom/webhook")({
       POST: async ({ request }) => {
         const raw = await request.text();
         const secret = process.env.SELCOM_WEBHOOK_SECRET;
-        if (secret) {
+        if (!secret) {
+          // Fail closed: never trust unsigned payment callbacks.
+          return new Response("Webhook not configured", { status: 503 });
+        }
+        {
           const sig = request.headers.get("x-selcom-signature") ?? "";
           const expected = createHmac("sha256", secret).update(raw).digest("hex");
           const a = Buffer.from(sig);

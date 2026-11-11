@@ -1,3 +1,4 @@
+import { usePaymentReference } from "@/lib/locks";
 import { pageHead } from "@/lib/seo";
 import { useReviewSummaries } from "@/lib/engagement";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
@@ -44,8 +45,9 @@ function Books() {
   const [openItem, setOpenItem] = useState<ContentItem | null>(null);
   const qc = useQueryClient();
   const claim = useServerFn(claimBundlePick);
+  const paymentReference = usePaymentReference();
   const claimMut = useMutation({
-    mutationFn: async (id: string) => claim({ data: { email, itemId: id } }),
+    mutationFn: async (id: string) => claim({ data: { email, itemId: id, paymentReference: paymentReference ?? "" } }),
     onSuccess: () => { toast.success("Free pick claimed!"); qc.invalidateQueries({ queryKey: ["unlocks", email] }); },
     onError: (e: Error) => toast.error(e.message),
   });
