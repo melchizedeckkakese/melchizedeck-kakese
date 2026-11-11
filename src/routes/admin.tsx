@@ -107,7 +107,7 @@ const PAGES: { page: string; sections: { key: string; label: string; fields: Fie
       { name: "bg_blog", label: "Blog page background", type: "image" },
       { name: "bg_advocacy", label: "Advocacy page background", type: "image" },
       { name: "bg_events", label: "Events page background", type: "image" },
-      { name: "bg_speeches", label: "Speeches page background", type: "image" },
+      { name: "bg_speeches", label: "Showreel page background", type: "image" },
       { name: "bg_contact", label: "Contact page background", type: "image" },
     ]},
     { key: "support", label: "Support My Vision (contributions)", fields: [
@@ -211,7 +211,7 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
     { name: "location", label: "Location" },
     { name: "url", label: "Related link (optional)" },
   ]},
-  { key: "speech", label: "Speeches (videos)", extraMeta: [
+  { key: "speech", label: "Showreel (videos)", extraMeta: [
     { name: "video_url", label: "Video file", type: "video" },
     { name: "external_url", label: "Or paste a YouTube / Vimeo / Facebook video link" },
     { name: "date", label: "Date (e.g. 2026-05-12)" },

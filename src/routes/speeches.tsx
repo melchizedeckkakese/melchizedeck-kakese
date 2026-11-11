@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CalendarDays, MapPin, Play, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/speeches")({
-  head: () => pageHead({ path: "/speeches", title: "Speeches & Talks | Melchizedeck Kakese", description: "Watch recorded speeches, talks and keynotes by Melchizedeck Kakese on storytelling, youth advocacy, leadership and African narratives.", type: "website" }),
+  head: () => pageHead({ path: "/speeches", title: "Showreel | Melchizedeck Kakese", description: "Watch recorded speeches, talks and keynotes by Melchizedeck Kakese on storytelling, youth advocacy, leadership and African narratives.", type: "website" }),
   component: Speeches,
 });
 
@@ -72,7 +72,7 @@ function Speeches() {
   return (
     <SiteLayout>
       <section className="mx-auto max-w-6xl px-6 py-24">
-        <h1 className="font-serif text-5xl text-cream">{h?.title ?? "Speeches"}</h1>
+        <h1 className="font-serif text-5xl text-cream">{h?.title ?? "Showreel"}</h1>
         <p className="mt-4 max-w-2xl text-muted-foreground">
           {h?.body ?? "Talks, keynotes and conversations — recorded on stage and online."}
         </p>
@@ -117,7 +117,7 @@ function Speeches() {
         </div>
 
         {sorted.length === 0 && (
-          <p className="mt-10 text-muted-foreground">No speeches published yet — check back soon.</p>
+          <p className="mt-10 text-muted-foreground">No videos published yet — check back soon.</p>
         )}
       </section>
 

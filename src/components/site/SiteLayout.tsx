@@ -55,7 +55,7 @@ const NAV: NavNode[] = [
       { to: "/advocacy", label: "Advocacy" },
       { to: "/events", label: "Events" },
       { to: "/advocacy", hash: "adventures", label: "Adventures" },
-      { to: "/speeches", label: "Speeches" },
+      { to: "/speeches", label: "Showreel" },
     ],
   },
   { to: "/contact", label: "Contact & Partner" },
@@ -69,7 +69,7 @@ const FOOTER_LINKS: NavChild[] = [
   { to: "/blog", label: "Blog" },
   { to: "/advocacy", label: "Advocacy" },
   { to: "/events", label: "Events" },
-  { to: "/speeches", label: "Speeches" },
+  { to: "/speeches", label: "Showreel" },
   { to: "/contact", label: "Contact & Partner" },
 ];
 
