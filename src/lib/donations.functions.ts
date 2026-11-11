@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
+import { formStorageConfig } from "@/lib/form-config";
 import type { Database } from "@/integrations/supabase/types";
 
 function makeFetch(key: string): typeof fetch {
@@ -14,8 +15,11 @@ function makeFetch(key: string): typeof fetch {
 }
 
 function serverClient() {
-  const url = process.env.SUPABASE_URL!;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
+  const { url, key } = formStorageConfig(process.env, {
+    VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    VITE_SUPABASE_PUBLISHABLE_KEY: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+  });
   return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
     global: { fetch: makeFetch(key) },
@@ -55,22 +59,19 @@ export const startDonation = createServerFn({ method: "POST" })
     const message = (data.message ?? "").trim().slice(0, 1000) || null;
     const phone = (data.phone ?? "").trim().slice(0, 30) || null;
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: donation, error } = await supabaseAdmin
-      .from("donations")
-      .insert({
-        name,
-        email,
-        phone,
-        amount,
-        currency,
-        message,
-        provider: "selcom",
-        status: "pending",
-      })
-      .select("id, order_ref, amount, currency")
-      .single();
-    if (error) throw new Error(error.message);
+    const donation = {
+      order_ref: "DON-" + crypto.randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase(),
+      amount,
+      currency,
+    };
+    const { error } = await supabase.from("donations").insert({
+      id: crypto.randomUUID(),
+      order_ref: donation.order_ref,
+      name, email, phone, amount, currency, message,
+      provider: "selcom",
+      status: "pending",
+    });
+    if (error) throw new Error("Could not start the payment. Please try again.");
 
     const { readSelcomCreds, createSelcomCheckoutOrder, buildReturnUrls } = await import(
       "@/lib/selcom.server"
