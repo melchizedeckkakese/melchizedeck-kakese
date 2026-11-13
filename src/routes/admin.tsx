@@ -202,7 +202,9 @@ const COLLECTIONS: { key: string; label: string; extraMeta: MetaField[]; lockabl
   { key: "advocacy", label: "Advocacy & adventures", extraMeta: [] },
   { key: "project", label: "Projects", extraMeta: [
     { name: "role", label: "My role (e.g. Founder, Contributor)" },
-    { name: "url", label: "Project link (optional)" },
+    { name: "url", label: "Project website link (optional)" },
+    { name: "support_url", label: "Support / donation link for this project (optional)" },
+    { name: "support_label", label: "Support button text (e.g. Support This Project)" },
     { name: "galleryTitle", label: "Photo catalogue title (optional)" },
     { name: "gallery", label: "Project photo catalogue", type: "gallery" },
   ]},
